@@ -1,0 +1,75 @@
+C:\Users\lenovo\AppData\Local\Programs\Python\Python39\python.exe: can't open file 'C:\Users\lenovo\Documents\project_dss\prediksi_cuaca.py': [Errno 2] No such file or directory
+[03/06/2026 16:25:39,52] Script selesai 
+Traceback (most recent call last):
+  File "C:\Users\lenovo\Documents\project_dss\uji_prediksi.py", line 11, in <module>
+    print("\u2705 Model berhasil diload!")
+  File "C:\Users\lenovo\AppData\Local\Programs\Python\Python39\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+[03/06/2026 16:27:44,01] Script selesai 
+✅ Model berhasil diload!
+============================================================
+📋 DATA CUACA REALTIME
+============================================================
+📅 Tanggal              : 03-06-2026
+🌡️ Suhu rata-rata       : 28.60 °C
+💧 Kelembapan           : 75.00 %
+☀️ Lama penyinaran      : 10.56 jam
+💨 Kecepatan angin      : 8.80 m/s
+🌧️ Hujan kemarin        : Ya
+🌡️ Suhu kemarin         : 28.40 °C
+💧 Kelembapan kemarin   : 74.00 %
+🌡️ Suhu 2 hari lalu     : 27.70 °C
+💧 Kelembapan 2 hari lalu : 81.00 %
+
+🎯 HASIL PREDIKSI
+============================================================
+Prediksi Cuaca : 🌧️ HUJAN
+Probabilitas Hujan       : 75.94%
+Probabilitas Tidak Hujan : 24.06%
+
+📊 TINGKAT KEYAKINAN MODEL
+============================================================
+⚠️ Sangat yakin HUJAN
+
+🌱 REKOMENDASI TANAM
+============================================================
+⚠️ Disarankan MENUNDA penanaman.
+Karena potensi hujan cukup tinggi.
+============================================================
+
+✅ Histori prediksi berhasil disimpan!
+[03/06/2026 16:28:33,91] Script selesai 
+✅ Model berhasil diload!
+============================================================
+📋 DATA CUACA REALTIME
+============================================================
+📅 Tanggal              : 03-06-2026
+🌡️ Suhu rata-rata       : 28.60 °C
+💧 Kelembapan           : 75.00 %
+☀️ Lama penyinaran      : 10.56 jam
+💨 Kecepatan angin      : 8.80 m/s
+🌧️ Hujan kemarin        : Ya
+🌡️ Suhu kemarin         : 28.40 °C
+💧 Kelembapan kemarin   : 74.00 %
+🌡️ Suhu 2 hari lalu     : 27.70 °C
+💧 Kelembapan 2 hari lalu : 81.00 %
+
+🎯 HASIL PREDIKSI
+============================================================
+Prediksi Cuaca : 🌧️ HUJAN
+Probabilitas Hujan       : 75.94%
+Probabilitas Tidak Hujan : 24.06%
+
+📊 TINGKAT KEYAKINAN MODEL
+============================================================
+⚠️ Sangat yakin HUJAN
+
+🌱 REKOMENDASI TANAM
+============================================================
+⚠️ Disarankan MENUNDA penanaman.
+Karena potensi hujan cukup tinggi.
+============================================================
+
+✅ Histori prediksi berhasil disimpan!
+[03/06/2026 16:39:21,95] Script selesai 
