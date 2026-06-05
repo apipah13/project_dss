@@ -73,3 +73,36 @@ Karena potensi hujan cukup tinggi.
 
 ✅ Histori prediksi berhasil disimpan!
 [03/06/2026 16:39:21,95] Script selesai 
+Model berhasil diload!
+============================================================
+DATA CUACA REALTIME
+============================================================
+Tanggal                   : 05-06-2026
+Suhu rata-rata            : 28.90 C
+Kelembapan                : 75.00 %
+Lama penyinaran           : 10.22 jam
+Kecepatan angin           : 17.90 m/s
+Hujan kemarin             : Ya
+Suhu kemarin              : 28.60 C
+Kelembapan kemarin        : 77.00 %
+Suhu 2 hari lalu          : 28.80 C
+Kelembapan 2 hari lalu    : 74.00 %
+
+HASIL PREDIKSI
+============================================================
+Prediksi Cuaca           : HUJAN
+Probabilitas Hujan       : 68.47%
+Probabilitas Tidak Hujan : 31.53%
+
+TINGKAT KEYAKINAN MODEL
+============================================================
+Kemungkinan besar HUJAN
+
+REKOMENDASI TANAM
+============================================================
+Disarankan MENUNDA penanaman.
+Karena potensi hujan cukup tinggi.
+============================================================
+
+Histori prediksi berhasil disimpan!
+[05/06/2026 20:49:30,18] Script selesai 

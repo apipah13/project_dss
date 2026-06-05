@@ -2,285 +2,298 @@ import joblib
 import pandas as pd
 import requests
 from datetime import datetime
+import os
+import matplotlib.pyplot as plt
+
+# ============================================================
+# TEST LOG
+# ============================================================
+with open("test_log.txt", "a") as f:
+    f.write(
+        f"Program berjalan - "
+        f"{datetime.now().strftime('%d-%m-%Y %H:%M:%S')}\n"
+    )
 
 # ============================================================
 # LOAD MODEL
 # ============================================================
 model = joblib.load("model_cuaca_rf.pkl")
 
-print("✅ Model berhasil diload!")
+print("Model berhasil diload!")
 print("=" * 60)
 
-# ============================================================
-# KOORDINAT LOKASI
-# Contoh: Tangerang
-# ============================================================
-latitude = -6.1783
-longitude = 106.6319
+try:
 
-# ============================================================
-# AMBIL DATA DARI OPEN-METEO API
-# ============================================================
-url = (
-    f"https://api.open-meteo.com/v1/forecast?"
-    f"latitude={latitude}&longitude={longitude}"
-    f"&daily=temperature_2m_mean,"
-    f"relative_humidity_2m_mean,"
-    f"sunshine_duration,"
-    f"precipitation_sum,"
-    f"wind_speed_10m_max"
-    f"&timezone=Asia%2FBangkok"
-    f"&past_days=2"
-)
+    # ============================================================
+    # KOORDINAT LOKASI - Tangerang
+    # ============================================================
+    latitude  = -6.1783
+    longitude = 106.6319
 
-response = requests.get(url)
-data = response.json()
-
-# ============================================================
-# AMBIL DATA DAILY
-# ============================================================
-daily = data["daily"]
-
-suhu = daily["temperature_2m_mean"]
-kelembapan = daily["relative_humidity_2m_mean"]
-penyinaran = daily["sunshine_duration"]
-hujan = daily["precipitation_sum"]
-angin = daily["wind_speed_10m_max"]
-
-# ============================================================
-# INDEX:
-# 0 = 2 hari lalu
-# 1 = kemarin
-# 2 = hari ini
-# ============================================================
-
-today = datetime.now()
-
-# ============================================================
-# DATA HARI INI
-# ============================================================
-suhu_rata = suhu[2]
-kelembapan_hari_ini = kelembapan[2]
-
-# konversi detik → jam
-lama_penyinaran = penyinaran[2] / 3600
-
-kecepatan_angin = angin[2]
-
-bulan = today.month
-hari = today.day
-
-# ============================================================
-# DATA KEMARIN
-# ============================================================
-suhu_kemarin = suhu[1]
-kelembapan_kemarin = kelembapan[1]
-
-# jika hujan > 0 mm maka dianggap hujan
-hujan_kemarin = 1 if hujan[1] > 0 else 0
-
-# ============================================================
-# DATA 2 HARI LALU
-# ============================================================
-suhu_2halu = suhu[0]
-kelembapan_2halu = kelembapan[0]
-
-# ============================================================
-# BUAT DATAFRAME
-# ============================================================
-data_input = pd.DataFrame([{
-    "suhu_rata": suhu_rata,
-    "kelembapan": kelembapan_hari_ini,
-    "lama_penyinaran": lama_penyinaran,
-    "angin": kecepatan_angin,
-    "bulan": bulan,
-    "hari": hari,
-    "suhu_kemarin": suhu_kemarin,
-    "kelembapan_kemarin": kelembapan_kemarin,
-    "hujan_kemarin": hujan_kemarin,
-    "suhu_2halu": suhu_2halu,
-    "kelembapan_2halu": kelembapan_2halu,
-}])
-
-# ============================================================
-# PREDIKSI
-# ============================================================
-prediksi = model.predict(data_input)[0]
-probabilitas = model.predict_proba(data_input)[0]
-
-prob_tidak_hujan = probabilitas[0] * 100
-prob_hujan = probabilitas[1] * 100
-
-# ============================================================
-# TAMPILKAN INPUT DATA
-# ============================================================
-print("📋 DATA CUACA REALTIME")
-print("=" * 60)
-
-print(f"📅 Tanggal              : {today.strftime('%d-%m-%Y')}")
-print(f"🌡️ Suhu rata-rata       : {suhu_rata:.2f} °C")
-print(f"💧 Kelembapan           : {kelembapan_hari_ini:.2f} %")
-print(f"☀️ Lama penyinaran      : {lama_penyinaran:.2f} jam")
-print(f"💨 Kecepatan angin      : {kecepatan_angin:.2f} m/s")
-print(f"🌧️ Hujan kemarin        : {'Ya' if hujan_kemarin == 1 else 'Tidak'}")
-
-print(f"🌡️ Suhu kemarin         : {suhu_kemarin:.2f} °C")
-print(f"💧 Kelembapan kemarin   : {kelembapan_kemarin:.2f} %")
-
-print(f"🌡️ Suhu 2 hari lalu     : {suhu_2halu:.2f} °C")
-print(f"💧 Kelembapan 2 hari lalu : {kelembapan_2halu:.2f} %")
-
-# ============================================================
-# HASIL PREDIKSI
-# ============================================================
-print("\n🎯 HASIL PREDIKSI")
-print("=" * 60)
-
-print(
-    f"Prediksi Cuaca : "
-    f"{'🌧️ HUJAN' if prediksi == 1 else '☀️ TIDAK HUJAN'}"
-)
-
-print(f"Probabilitas Hujan       : {prob_hujan:.2f}%")
-print(f"Probabilitas Tidak Hujan : {prob_tidak_hujan:.2f}%")
-
-# ============================================================
-# TINGKAT KEYAKINAN MODEL
-# ============================================================
-print("\n📊 TINGKAT KEYAKINAN MODEL")
-print("=" * 60)
-
-if prob_hujan >= 75:
-    print("⚠️ Sangat yakin HUJAN")
-
-elif prob_hujan >= 55:
-    print("🌦️ Kemungkinan besar HUJAN")
-
-elif prob_tidak_hujan >= 75:
-    print("✅ Sangat yakin TIDAK HUJAN")
-
-elif prob_tidak_hujan >= 55:
-    print("🌤️ Kemungkinan besar TIDAK HUJAN")
-
-else:
-    print("🤔 Model kurang yakin")
-
-# ============================================================
-# REKOMENDASI WAKTU TANAM
-# ============================================================
-print("\n🌱 REKOMENDASI TANAM")
-print("=" * 60)
-
-if prediksi == 1:
-    print("⚠️ Disarankan MENUNDA penanaman.")
-    print("Karena potensi hujan cukup tinggi.")
-
-else:
-    print("✅ Waktu tanam cukup baik.")
-    print("Cuaca diprediksi tidak hujan.")
-
-print("=" * 60)
-
-hasil = pd.DataFrame([{
-    "tanggal": today.strftime("%d-%m-%Y"),
-    "prediksi": "HUJAN" if prediksi == 1 else "TIDAK HUJAN",
-    "prob_hujan": round(prob_hujan, 2),
-    "prob_tidak_hujan": round(prob_tidak_hujan, 2),
-    "rekomendasi": (
-        "Tunda Tanam"
-        if prediksi == 1
-        else "Waktu Tanam Baik"
+    # ============================================================
+    # AMBIL DATA DARI OPEN-METEO API
+    # ============================================================
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={latitude}&longitude={longitude}"
+        f"&daily=temperature_2m_mean,"
+        f"relative_humidity_2m_mean,"
+        f"sunshine_duration,"
+        f"precipitation_sum,"
+        f"wind_speed_10m_max"
+        f"&timezone=Asia%2FJakarta"
+        f"&past_days=2"
     )
-}])
 
-import os
+    response = requests.get(url)
+    data = response.json()
 
-# ============================================================
-# SIMPAN HISTORI PREDIKSI
-# ============================================================
+    # ============================================================
+    # VALIDASI DATA
+    # ============================================================
+    daily = data["daily"]
 
-import os
+    suhu       = daily["temperature_2m_mean"]
+    kelembapan = daily["relative_humidity_2m_mean"]
+    penyinaran = daily["sunshine_duration"]
+    hujan      = daily["precipitation_sum"]
+    angin      = daily["wind_speed_10m_max"]
 
-file_csv = "laporan_prediksi.csv"
+    if len(suhu) < 3:
+        raise ValueError(
+            f"Data API tidak cukup. Hanya ada {len(suhu)} hari"
+        )
 
-# tambah timestamp lengkap
-hasil["tanggal"] = today.strftime("%d-%m-%Y %H:%M:%S")
+    # ============================================================
+    # FITUR WAKTU
+    # ============================================================
+    tanggal_hari_ini = daily["time"][2]
+    today = datetime.strptime(tanggal_hari_ini, "%Y-%m-%d")
 
-# kalau file sudah ada
-if os.path.exists(file_csv):
+    bulan = today.month
+    hari  = today.day
 
-    # baca data lama
-    df_lama = pd.read_csv(file_csv)
+    # ============================================================
+    # DATA CUACA
+    # ============================================================
+    suhu_rata             = suhu[2]
+    kelembapan_hari_ini   = kelembapan[2]
+    lama_penyinaran       = penyinaran[2] / 3600
+    kecepatan_angin       = angin[2]
 
-    # gabungkan data lama + baru
-    df_gabung = pd.concat([df_lama, hasil], ignore_index=True)
+    suhu_kemarin          = suhu[1]
+    kelembapan_kemarin    = kelembapan[1]
+    hujan_kemarin         = 1 if hujan[1] > 0 else 0
 
-    # hapus duplicate
-    df_gabung = df_gabung.drop_duplicates()
+    suhu_2hari_lalu       = suhu[0]
+    kelembapan_2hari_lalu = kelembapan[0]
 
-    # simpan lagi
-    df_gabung.to_csv(file_csv, index=False)
+    # ============================================================
+    # DATAFRAME INPUT
+    # ============================================================
+    data_input = pd.DataFrame([{
+        "suhu_rata"          : suhu_rata,
+        "kelembapan"         : kelembapan_hari_ini,
+        "lama_penyinaran"    : lama_penyinaran,
+        "angin"              : kecepatan_angin,
+        "bulan"              : bulan,
+        "hari"               : hari,
+        "suhu_kemarin"       : suhu_kemarin,
+        "kelembapan_kemarin" : kelembapan_kemarin,
+        "hujan_kemarin"      : hujan_kemarin,
+        "suhu_2halu"         : suhu_2hari_lalu,
+        "kelembapan_2halu"   : kelembapan_2hari_lalu,
+    }])
 
-else:
+    # ============================================================
+    # PREDIKSI
+    # ============================================================
+    prediksi     = model.predict(data_input)[0]
+    probabilitas = model.predict_proba(data_input)[0]
 
-    # buat file baru
-    hasil.to_csv(file_csv, index=False)
+    prob_tidak_hujan = probabilitas[0] * 100
+    prob_hujan       = probabilitas[1] * 100
 
-print("\n✅ Histori prediksi berhasil disimpan!")
+    # ============================================================
+    # PENENTUAN STATUS CUACA
+    # ============================================================
+    if prob_hujan >= 75:
 
+        status_cuaca = "HUJAN"
+        rekomendasi = "Tunda Tanam"
 
-# ============================================================
-# GRAFIK DSS CUACA
-# ============================================================
+    elif prob_hujan >= 60:
 
-import matplotlib.pyplot as plt
+        status_cuaca = "BERPOTENSI HUJAN"
+        rekomendasi = "Pertimbangkan Menunda"
 
-# membuat 1 figure dengan 2 grafik
-fig, ax = plt.subplots(1, 2, figsize=(12,5))
+    else:
 
-# ============================================================
-# PIE CHART
-# ============================================================
+        status_cuaca = "TIDAK HUJAN"
+        rekomendasi = "Waktu Tanam Baik"
 
-labels = ['Hujan', 'Tidak Hujan']
-sizes = [prob_hujan, prob_tidak_hujan]
+    # ============================================================
+    # TAMPILKAN HASIL
+    # ============================================================
+    print("\n")
+    print("=" * 60)
+    print("DATA CUACA REALTIME")
+    print("=" * 60)
 
-ax[0].pie(
-    sizes,
-    labels=labels,
-    autopct='%1.1f%%'
-)
+    print(f"Waktu                    : {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
+    print(f"Suhu rata-rata           : {suhu_rata:.2f} C")
+    print(f"Kelembapan               : {kelembapan_hari_ini:.2f} %")
+    print(f"Lama penyinaran          : {lama_penyinaran:.2f} jam")
+    print(f"Kecepatan angin          : {kecepatan_angin:.2f} m/s")
 
-ax[0].set_title("Probabilitas Prediksi Cuaca")
+    print("\nHASIL PREDIKSI")
+    print("=" * 60)
 
-# ============================================================
-# BAR CHART
-# ============================================================
+    print(f"Status Cuaca             : {status_cuaca}")
+    print(f"Probabilitas Hujan       : {prob_hujan:.2f}%")
+    print(f"Probabilitas Tidak Hujan : {prob_tidak_hujan:.2f}%")
 
-fitur = [
-    'Suhu',
-    'Kelembapan',
-    'Penyinaran',
-    'Angin'
-]
+    # ============================================================
+    # TINGKAT KEYAKINAN MODEL
+    # ============================================================
+    print("\nTINGKAT KEYAKINAN MODEL")
+    print("=" * 60)
 
-nilai = [
-    suhu_rata,
-    kelembapan_hari_ini,
-    lama_penyinaran,
-    kecepatan_angin
-]
+    if prob_hujan >= 85:
 
-ax[1].bar(fitur, nilai)
+        print("Model sangat yakin akan terjadi hujan.")
 
-ax[1].set_title("Kondisi Cuaca Hari Ini")
+    elif prob_hujan >= 75:
 
-ax[1].set_ylabel("Nilai")
+        print("Kemungkinan hujan tinggi.")
 
-# ============================================================
-# TAMPILKAN SEMUA GRAFIK
-# ============================================================
+    elif prob_hujan >= 60:
 
-plt.tight_layout()
+        print("Ada potensi hujan.")
 
-plt.show()
+    else:
+
+        print("Cuaca cenderung aman.")
+
+    # ============================================================
+    # REKOMENDASI TANAM
+    # ============================================================
+    print("\nREKOMENDASI TANAM")
+    print("=" * 60)
+
+    if status_cuaca == "HUJAN":
+
+        print("Disarankan MENUNDA penanaman.")
+        print("Karena potensi hujan sangat tinggi.")
+
+    elif status_cuaca == "BERPOTENSI HUJAN":
+
+        print("Cuaca berpotensi hujan.")
+        print("Sebaiknya mempertimbangkan kondisi lapangan.")
+
+    else:
+
+        print("Waktu tanam cukup baik.")
+        print("Cuaca diprediksi tidak hujan.")
+
+    # ============================================================
+    # SIMPAN HISTORI KE CSV
+    # ============================================================
+    timestamp_sekarang = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    hasil = pd.DataFrame([{
+        "tanggal"          : timestamp_sekarang,
+        "prediksi"         : status_cuaca,
+        "prob_hujan"       : round(prob_hujan, 2),
+        "prob_tidak_hujan" : round(prob_tidak_hujan, 2),
+        "rekomendasi"      : rekomendasi
+    }])
+
+    file_csv = "laporan_prediksi.csv"
+
+    if os.path.exists(file_csv):
+
+        hasil.to_csv(
+            file_csv,
+            mode='a',
+            header=False,
+            index=False
+        )
+
+    else:
+
+        hasil.to_csv(
+            file_csv,
+            index=False
+        )
+
+    print("\nHistori prediksi berhasil disimpan!")
+
+    # ============================================================
+    # GRAFIK DSS CUACA
+    # ============================================================
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+
+    # PIE CHART
+    labels = ["Hujan", "Tidak Hujan"]
+    sizes  = [prob_hujan, prob_tidak_hujan]
+
+    ax[0].pie(
+        sizes,
+        labels=labels,
+        autopct="%1.1f%%"
+    )
+
+    ax[0].set_title("Probabilitas Prediksi Cuaca")
+
+    # BAR CHART
+    fitur = [
+        "Suhu",
+        "Kelembapan",
+        "Penyinaran",
+        "Angin"
+    ]
+
+    nilai = [
+        suhu_rata,
+        kelembapan_hari_ini,
+        lama_penyinaran,
+        kecepatan_angin
+    ]
+
+    ax[1].bar(fitur, nilai)
+
+    ax[1].set_title("Kondisi Cuaca Hari Ini")
+    ax[1].set_ylabel("Nilai")
+
+    plt.tight_layout()
+
+    # ============================================================
+    # SIMPAN GRAFIK
+    # ============================================================
+    nama_grafik = (
+        f"grafik_"
+        f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    )
+
+    plt.savefig(nama_grafik)
+
+    plt.close()
+
+    print(f"Grafik berhasil disimpan: {nama_grafik}")
+
+    print("=" * 60)
+    print("PROGRAM SELESAI")
+    print("=" * 60)
+
+except Exception as e:
+
+    print(f"Terjadi error: {e}")
+
+    with open("error_log.txt", "a") as f:
+
+        f.write(
+            f"{datetime.now()} - {str(e)}\n"
+        )
+
+    print("Error berhasil disimpan ke error_log.txt")
