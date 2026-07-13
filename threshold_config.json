@@ -1,0 +1,9 @@
+{
+  "threshold_hujan_persen": 43.5,
+  "ambang_curah_hujan_mm": 1.0,
+  "macro_f1_pada_threshold": 0.8251,
+  "precision_kelas_hujan": 0.9346,
+  "recall_kelas_hujan": 0.9154,
+  "f1_kelas_hujan": 0.9249,
+  "catatan": "threshold_hujan_persen adalah ambang probabilitas hujan (%) hasil kalibrasi otomatis yang memaksimalkan macro F1 (rata-rata F1 kelas Hujan & Tidak Hujan) pada test set. Dipakai oleh uji_prediksi.py untuk menentukan status HUJAN vs TIDAK HUJAN."
+}

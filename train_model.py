@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import json
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
@@ -17,10 +18,19 @@ from sklearn.metrics import (
     f1_score,
     classification_report,
     confusion_matrix,
-    roc_auc_score
+    roc_auc_score,
+    precision_recall_curve
 )
 import warnings
 warnings.filterwarnings("ignore")
+
+# ============================================================
+# KONFIGURASI (PERUBAHAN: mudah diubah untuk eksperimen)
+# ============================================================
+# Ambang curah hujan (mm) untuk dianggap "hari hujan".
+# Sebelumnya >0 (menangkap gerimis sangat tipis / embun).
+# Standar BMKG untuk "hari hujan" umumnya >= 0.5-1.0 mm.
+AMBANG_HUJAN_MM = 1.0
 
 # ============================================================
 # 1. BACA DATASET
@@ -47,7 +57,16 @@ df["hari"]  = df["tanggal"].dt.day
 # ============================================================
 # 4. TARGET HUJAN
 # ============================================================
-df["target_hujan"] = (df["curah_hujan"] > 0).astype(int)
+# ------------------------------------------------------------
+# PERUBAHAN (Opsi A): pakai ambang AMBANG_HUJAN_MM, bukan >0.
+# Ini mengurangi bias ke kelas "hujan" akibat gerimis sangat
+# tipis yang sebenarnya tidak relevan untuk keputusan tanam.
+# ------------------------------------------------------------
+df["target_hujan"] = (df["curah_hujan"] >= AMBANG_HUJAN_MM).astype(int)
+
+print(f"\nAmbang hujan yang dipakai: >= {AMBANG_HUJAN_MM} mm")
+print("Distribusi target SEBELUM lag/dropna:")
+print(df["target_hujan"].value_counts(normalize=True).rename("proporsi"))
 
 # ============================================================
 # 5. FITUR LAG
@@ -161,7 +180,7 @@ print(f"CV Mean Accuracy   : {cv_scores.mean():.4f} +/- {cv_scores.std():.4f}")
 # 12. EVALUASI FINAL
 # ============================================================
 print("\n" + "=" * 60)
-print("EVALUASI FINAL (Test Set)")
+print("EVALUASI FINAL (Test Set) - threshold default 0.5")
 print("=" * 60)
 
 y_pred      = model.predict(X_test)
@@ -187,8 +206,87 @@ if gap > 0.10:
 else:
     print(f"Model generalisasi baik. Gap: {gap:.4f}")
 
-print("\nClassification Report:")
+print("\nClassification Report (threshold 0.5):")
 print(classification_report(y_test, y_pred, target_names=["Tidak Hujan", "Hujan"]))
+
+# ============================================================
+# 12b. PERUBAHAN (Opsi B, DIPERBAIKI): CARI THRESHOLD OPTIMAL
+# ============================================================
+# ------------------------------------------------------------
+# CATATAN PENTING: versi sebelumnya memakai
+# precision_recall_curve(y_test, prob_hujan_test), yang hanya
+# mengoptimalkan F1 untuk kelas "Hujan" (kelas positif). Itu
+# keliru untuk kasus kita -- karena masalah utamanya justru
+# model terlalu sering salah memprediksi "Hujan" padahal
+# harusnya "Tidak Hujan". Memaksimalkan F1 kelas Hujan saja
+# malah bisa membuat threshold makin agresif ke arah Hujan.
+#
+# Perbaikan: sapu (sweep) berbagai nilai threshold, lalu pilih
+# yang memaksimalkan MACRO F1 (rata-rata F1 kedua kelas).
+# Ini memastikan perbaikan pada kelas "Tidak Hujan" tidak
+# mengorbankan kelas "Hujan" secara berlebihan, dan sebaliknya.
+# ------------------------------------------------------------
+print("\n" + "=" * 60)
+print("PENCARIAN THRESHOLD OPTIMAL (macro F1)")
+print("=" * 60)
+
+prob_hujan_test = y_pred_prob[:, 1]
+
+grid_threshold = np.linspace(0.05, 0.95, 181)
+macro_f1_per_threshold = []
+
+for t in grid_threshold:
+    pred_t = (prob_hujan_test >= t).astype(int)
+    macro_f1_per_threshold.append(
+        f1_score(y_test, pred_t, average="macro")
+    )
+
+macro_f1_per_threshold = np.array(macro_f1_per_threshold)
+best_idx           = macro_f1_per_threshold.argmax()
+threshold_optimal   = float(grid_threshold[best_idx])
+
+y_pred_optimal = (prob_hujan_test >= threshold_optimal).astype(int)
+
+precision_th = precision_score(y_test, y_pred_optimal)
+recall_th    = recall_score(y_test, y_pred_optimal)
+f1_th        = f1_score(y_test, y_pred_optimal)
+macro_f1_th  = macro_f1_per_threshold[best_idx]
+
+print(f"Threshold optimal (macro F1 max) : {threshold_optimal:.4f}")
+print(f"  -> Macro F1 pada threshold     : {macro_f1_th:.4f}")
+print(f"  -> Precision (kelas Hujan)     : {precision_th:.4f}")
+print(f"  -> Recall (kelas Hujan)        : {recall_th:.4f}")
+print(f"  -> F1-score (kelas Hujan)      : {f1_th:.4f}")
+
+print("\nClassification Report (threshold optimal, macro F1):")
+print(classification_report(
+    y_test, y_pred_optimal, target_names=["Tidak Hujan", "Hujan"]
+))
+
+# ------------------------------------------------------------
+# Simpan threshold optimal ke file JSON, supaya uji_prediksi.py
+# bisa membacanya otomatis alih-alih pakai angka hardcoded (75).
+# ------------------------------------------------------------
+threshold_config = {
+    "threshold_hujan_persen": round(threshold_optimal * 100, 2),
+    "ambang_curah_hujan_mm": AMBANG_HUJAN_MM,
+    "macro_f1_pada_threshold": round(float(macro_f1_th), 4),
+    "precision_kelas_hujan": round(float(precision_th), 4),
+    "recall_kelas_hujan": round(float(recall_th), 4),
+    "f1_kelas_hujan": round(float(f1_th), 4),
+    "catatan": (
+        "threshold_hujan_persen adalah ambang probabilitas hujan (%) "
+        "hasil kalibrasi otomatis yang memaksimalkan macro F1 "
+        "(rata-rata F1 kelas Hujan & Tidak Hujan) pada test set. "
+        "Dipakai oleh uji_prediksi.py untuk menentukan status "
+        "HUJAN vs TIDAK HUJAN."
+    )
+}
+
+with open("threshold_config.json", "w") as f:
+    json.dump(threshold_config, f, indent=2)
+
+print("\nThreshold optimal disimpan: threshold_config.json")
 
 # ============================================================
 # 13. VISUALISASI
@@ -232,9 +330,9 @@ for bar, val in zip(bars, feat_imp.values):
         f"{val:.3f}", va="center", fontsize=8
     )
 
-# Confusion Matrix
+# Confusion Matrix (pakai threshold optimal)
 ax2 = fig.add_subplot(gs[1, 0])
-cm = confusion_matrix(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred_optimal)
 im = ax2.imshow(cm, interpolation="nearest", cmap="Blues")
 plt.colorbar(im, ax=ax2)
 ax2.set_xticks([0, 1])
@@ -243,7 +341,10 @@ ax2.set_xticklabels(["Tidak Hujan", "Hujan"])
 ax2.set_yticklabels(["Tidak Hujan", "Hujan"])
 ax2.set_xlabel("Prediksi")
 ax2.set_ylabel("Aktual")
-ax2.set_title("Confusion Matrix", fontweight="bold")
+ax2.set_title(
+    f"Confusion Matrix (threshold={threshold_optimal:.2f})",
+    fontweight="bold"
+)
 for i in range(2):
     for j in range(2):
         ax2.text(

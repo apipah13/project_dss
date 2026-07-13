@@ -106,3 +106,141 @@ Karena potensi hujan cukup tinggi.
 
 Histori prediksi berhasil disimpan!
 [05/06/2026 20:49:30,18] Script selesai 
+[14/07/2026  2:10:33,28] MULAI menjalankan uji_prediksi.py 
+Threshold dimuat dari threshold_config.json: 43.5%
+  (Macro F1 kalibrasi: 0.8251, ambang curah hujan: 1.0 mm)
+============================================================
+Model berhasil diload!
+============================================================
+Fitur yang diharapkan model (urutan saat training):
+['suhu_rata', 'kelembapan', 'lama_penyinaran', 'angin', 'bulan', 'hari', 'suhu_kemarin', 'kelembapan_kemarin', 'hujan_kemarin', 'suhu_2halu', 'kelembapan_2halu']
+============================================================
+Fitur yang digunakan untuk prediksi kali ini:
+ suhu_rata  kelembapan  lama_penyinaran  angin  bulan  hari  suhu_kemarin  kelembapan_kemarin  hujan_kemarin  suhu_2halu  kelembapan_2halu
+      28.8          65        11.613236   18.1      7    14          28.6                  65              0        28.2                65
+
+
+
+============================================================
+DATA CUACA REALTIME
+============================================================
+Waktu                    : 14-07-2026 02:10:36
+Suhu rata-rata           : 28.80 C
+Kelembapan               : 65.00 %
+Lama penyinaran          : 11.61 jam
+Kecepatan angin          : 18.10 m/s
+
+HASIL PREDIKSI
+============================================================
+Status Cuaca             : TIDAK HUJAN
+Probabilitas Hujan       : 4.30%
+Probabilitas Tidak Hujan : 95.70%
+
+TINGKAT KEYAKINAN MODEL
+============================================================
+Cuaca cenderung aman.
+
+REKOMENDASI TANAM
+============================================================
+Waktu tanam cukup baik.
+Cuaca diprediksi tidak hujan.
+
+Histori prediksi berhasil disimpan!
+Grafik berhasil disimpan: grafik_20260714_021037.png
+============================================================
+PROGRAM SELESAI
+============================================================
+[14/07/2026  2:10:37,75] SELESAI 
+---------------------------------------------------------- 
+[14/07/2026  2:17:34,41] MULAI menjalankan uji_prediksi.py 
+Threshold dimuat dari threshold_config.json: 43.5%
+  (Macro F1 kalibrasi: 0.8251, ambang curah hujan: 1.0 mm)
+============================================================
+Model berhasil diload!
+============================================================
+Fitur yang diharapkan model (urutan saat training):
+['suhu_rata', 'kelembapan', 'lama_penyinaran', 'angin', 'bulan', 'hari', 'suhu_kemarin', 'kelembapan_kemarin', 'hujan_kemarin', 'suhu_2halu', 'kelembapan_2halu']
+============================================================
+Fitur yang digunakan untuk prediksi kali ini:
+ suhu_rata  kelembapan  lama_penyinaran  angin  bulan  hari  suhu_kemarin  kelembapan_kemarin  hujan_kemarin  suhu_2halu  kelembapan_2halu
+      28.8          65        11.613236   18.1      7    14          28.6                  65              0        28.2                65
+
+
+
+============================================================
+DATA CUACA REALTIME
+============================================================
+Waktu                    : 14-07-2026 02:17:37
+Suhu rata-rata           : 28.80 C
+Kelembapan               : 65.00 %
+Lama penyinaran          : 11.61 jam
+Kecepatan angin          : 18.10 m/s
+
+HASIL PREDIKSI
+============================================================
+Status Cuaca             : TIDAK HUJAN
+Probabilitas Hujan       : 4.30%
+Probabilitas Tidak Hujan : 95.70%
+
+TINGKAT KEYAKINAN MODEL
+============================================================
+Cuaca cenderung aman.
+
+REKOMENDASI TANAM
+============================================================
+Waktu tanam cukup baik.
+Cuaca diprediksi tidak hujan.
+
+Histori prediksi berhasil disimpan!
+Grafik berhasil disimpan: grafik_20260714_021738.png
+============================================================
+PROGRAM SELESAI
+============================================================
+[14/07/2026  2:17:38,81] SELESAI 
+---------------------------------------------------------- 
+[14/07/2026  2:18:01,28] MULAI menjalankan uji_prediksi.py 
+Threshold dimuat dari threshold_config.json: 43.5%
+  (Macro F1 kalibrasi: 0.8251, ambang curah hujan: 1.0 mm)
+============================================================
+Model berhasil diload!
+============================================================
+Fitur yang diharapkan model (urutan saat training):
+['suhu_rata', 'kelembapan', 'lama_penyinaran', 'angin', 'bulan', 'hari', 'suhu_kemarin', 'kelembapan_kemarin', 'hujan_kemarin', 'suhu_2halu', 'kelembapan_2halu']
+============================================================
+Fitur yang digunakan untuk prediksi kali ini:
+ suhu_rata  kelembapan  lama_penyinaran  angin  bulan  hari  suhu_kemarin  kelembapan_kemarin  hujan_kemarin  suhu_2halu  kelembapan_2halu
+      28.8          65        11.613236   18.1      7    14          28.6                  65              0        28.2                65
+
+
+
+============================================================
+DATA CUACA REALTIME
+============================================================
+Waktu                    : 14-07-2026 02:18:04
+Suhu rata-rata           : 28.80 C
+Kelembapan               : 65.00 %
+Lama penyinaran          : 11.61 jam
+Kecepatan angin          : 18.10 m/s
+
+HASIL PREDIKSI
+============================================================
+Status Cuaca             : TIDAK HUJAN
+Probabilitas Hujan       : 4.30%
+Probabilitas Tidak Hujan : 95.70%
+
+TINGKAT KEYAKINAN MODEL
+============================================================
+Cuaca cenderung aman.
+
+REKOMENDASI TANAM
+============================================================
+Waktu tanam cukup baik.
+Cuaca diprediksi tidak hujan.
+
+Histori prediksi berhasil disimpan!
+Grafik berhasil disimpan: grafik_20260714_021805.png
+============================================================
+PROGRAM SELESAI
+============================================================
+[14/07/2026  2:18:05,84] SELESAI 
+---------------------------------------------------------- 
