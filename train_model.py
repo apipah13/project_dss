@@ -19,6 +19,7 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
     roc_auc_score,
+    roc_curve,
     precision_recall_curve
 )
 import warnings
@@ -371,6 +372,31 @@ for i, (fold, score) in enumerate(zip(folds, cv_scores)):
 
 plt.savefig("hasil_evaluasi_model.png", dpi=150, bbox_inches="tight")
 print("\nVisualisasi disimpan: hasil_evaluasi_model.png")
+plt.show()
+
+# ============================================================
+# 13b. GRAFIK ROC CURVE (TAMBAHAN untuk lampiran)
+# ============================================================
+# ------------------------------------------------------------
+# roc_auc_score di atas hanya menghasilkan ANGKA. Kurva ROC-nya
+# sendiri perlu digambar terpisah memakai roc_curve, yang
+# mengembalikan FPR (false positive rate) dan TPR (true positive
+# rate) pada berbagai ambang keputusan.
+# ------------------------------------------------------------
+fpr, tpr, roc_thresholds = roc_curve(y_test, y_pred_prob[:, 1])
+
+plt.figure(figsize=(6, 5))
+plt.plot(fpr, tpr, color="#2196F3", linewidth=2,
+         label=f"Random Forest (ROC-AUC = {roc:.4f})")
+plt.plot([0, 1], [0, 1], linestyle="--", color="gray",
+         label="Random Guess (AUC = 0.5000)")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("Kurva ROC - Model Random Forest", fontweight="bold")
+plt.legend(loc="lower right")
+plt.grid(alpha=0.3)
+plt.savefig("roc_curve.png", dpi=150, bbox_inches="tight")
+print("Grafik ROC curve disimpan: roc_curve.png")
 plt.show()
 
 # ============================================================
